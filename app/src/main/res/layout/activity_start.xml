@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background"
+    tools:context="com.golub.golubroman.innotechtest.Start.StartActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:textAlignment="center"
+        android:textSize="22sp"
+        android:textColor="@android:color/white"
+        android:text="Авторизация"
+        android:background="@drawable/header"
+        android:layout_centerHorizontal="true"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/phone_code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="+38"
+                android:textSize="22sp"
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/colorAccent" />
+            <EditText
+                android:id="@+id/input_phone"
+                android:layout_width="200dp"
+                android:layout_height="40sp"
+                android:layout_gravity="center_vertical"
+                android:padding="8dp"
+                android:maxLength="10"
+                android:inputType="numberDecimal"
+                android:hint="Введите телефон"/>
+            <TextView
+                android:id="@+id/request_phone_code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/colorAccent"
+                android:textSize="35sp"
+                android:text="\?" />
+        </LinearLayout>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+            <Button
+                android:id="@+id/get_code"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="16dp"
+                android:text="Получить код"
+                android:textColor="@android:color/white"
+                android:background="@color/colorPrimary"/>
+            <ImageView
+                android:id="@+id/get_code_inactive"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/inactiveButton"/>
+        </RelativeLayout>
+
+        <EditText
+            android:id="@+id/input_code"
+            android:layout_width="150dp"
+            android:layout_height="40sp"
+            android:layout_marginTop="16dp"
+            android:padding="8dp"
+            android:hint="Введите код"
+            android:gravity="center"
+            android:layout_gravity="center_horizontal"
+            android:background="@android:color/white" />
+
+        <Button
+            android:id="@+id/submit_code"
+            android:layout_width="200dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:text="Подтвердить"
+            android:textColor="@android:color/white"
+            android:background="@color/colorPrimary"
+            android:layout_gravity="center_horizontal"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

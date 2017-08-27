@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">InnotechTest</string>
+    <string name="google_maps_key">AIzaSyBgROodWtQOpBRfJBbyY9rIFqTHut9jEdk</string>
+    <string-array name="phone_code_titles">
+        <item>+38(UA)</item>
+        <item>+7(RU)</item>
+        <item>+1(US)</item>
+    </string-array>
+
+    <string-array name="phone_codes">
+        <item>+38</item>
+        <item>+7</item>
+        <item>+1</item>
+    </string-array>
+</resources>

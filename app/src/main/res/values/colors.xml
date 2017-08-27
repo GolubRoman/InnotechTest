@@ -4,6 +4,10 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#303F9F</color>
     <color name="inactiveButton">#33000000</color>
+    <color name="shadowBackground">#55000000</color>
     <color name="colorGreen">#1cc143</color>
     <color name="colorGray">#dfdfdf</color>
+
+    <color name="startProgress">#fed501</color>
+    <color name="endProgress">#e3c72e</color>
 </resources>

@@ -12,6 +12,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.FragmentById;
 
 /**
@@ -21,6 +22,18 @@ import org.androidannotations.annotations.FragmentById;
 //  creating activity for displaying map
 @EActivity(R.layout.activity_map)
 public class MapActivity extends Activity {
+
+    private double longitude, latitude;
+
+    @Extra
+    void setLong(double longitude){
+        this.longitude = longitude;
+    }
+
+    @Extra
+    void setLat(double latitude){
+        this.latitude = latitude;
+    }
 
 //    retrieving fragment map from xml by id
     @FragmentById(R.id.map)
@@ -37,8 +50,8 @@ public class MapActivity extends Activity {
 //                    map is ready
 //                    adding marker to map with title
                     googleMap.addMarker(new MarkerOptions().
-                            position(new LatLng(50.447841, 30.451677))
-                            .title("Marker"));
+                            position(new LatLng(latitude, longitude))
+                            .title("Your location"));
 //                    displaying the message when map is ready
                     Toast.makeText(MapActivity.this, "Map is ready", Toast.LENGTH_SHORT).show();
                 }

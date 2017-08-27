@@ -1,15 +1,24 @@
 package com.golub.golubroman.innotechtest.Start;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.golub.golubroman.innotechtest.Map.Location.LocationFragment;
 import com.golub.golubroman.innotechtest.Map.MapActivity_;
 import com.golub.golubroman.innotechtest.R;
 import com.golub.golubroman.innotechtest.Start.Retrofit.RetrofitModule;
@@ -21,22 +30,29 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.res.ColorRes;
+import org.androidannotations.annotations.res.DrawableRes;
 
 import java.io.IOException;
 import retrofit2.Response;
 
 //Creating first activity when running the app
 @EActivity(R.layout.activity_start)
-public class StartActivity extends Activity implements RequestPhoneCodeFragment.OnPhoneCodeSelectedListener{
+public class StartActivity extends Activity implements RequestPhoneCodeFragment.OnPhoneCodeSelectedListener,
+        LocationFragment.OnLocationListener{
 
 //    Object of interface for getting results from requestphone dialogfragment
     private RequestPhoneCodeFragment requestPhoneCodeFragment;
 //    int variable for saving choice on dialogfragment
     private int currentPhoneCodePosition;
+    private final int LOCATION_CODE = 1000;
+    private Fragment locationFragment;
 
 //    retreiving colors from resources
     @ColorRes(R.color.colorGreen)
     int colorGreen;
+
+    @DrawableRes(R.drawable.progress_drawable)
+    Drawable progressDrawable;
 
     @ColorRes(R.color.colorPrimary)
     int colorPrimary;
@@ -46,6 +62,12 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
 //    edit text for inputting the phone number
     @ViewById(R.id.input_phone)
     EditText inputPhone;
+
+    @ViewById(R.id.progressLayout)
+    RelativeLayout progressLayout;
+
+    @ViewById(R.id.progressBar)
+    ProgressBar progressBar;
 
 //    shadow rectangle for making button darker
     @ViewById(R.id.get_code_inactive)
@@ -103,7 +125,7 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
 //    click listener to button for submitting code
     @Click(R.id.submit_code)
     protected void onSubmitCode(){
-        MapActivity_.intent(this).start();
+        requestLocationPermission();
     }
 
 //    click listener to button for getting code
@@ -136,9 +158,11 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
     @AfterViews
     protected void afterViews(){
 //        start configuration of the screen
+        progressBar.setProgressDrawable(progressDrawable);
         getCode.setEnabled(false);
         phoneCodeText.setTextColor(colorPrimary);
         inputPhone.setTextColor(colorPrimary);
+        locationFragment = LocationFragment.newInstance();
     }
 
 //    interface method for getting results from dialog
@@ -146,5 +170,33 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
     public void onPhoneCodeSelected(int position, String phoneCode) {
         currentPhoneCodePosition = position;
         phoneCodeText.setText(phoneCode);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == LOCATION_CODE){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                getFragmentManager().beginTransaction().
+                        replace(android.R.id.content, locationFragment, "LocationFragment").
+                        commit();
+                progressLayout.setVisibility(View.VISIBLE);
+
+            }else{
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void requestLocationPermission(){
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_CODE);
+    }
+
+    @Override
+    public void setLocation(double latitude, double longitude) {
+        progressLayout.setVisibility(View.GONE);
+        MapActivity_.intent(this).setLong(longitude).setLat(latitude).start();
     }
 }

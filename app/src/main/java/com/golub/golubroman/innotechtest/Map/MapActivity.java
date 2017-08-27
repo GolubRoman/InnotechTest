@@ -1,9 +1,12 @@
 package com.golub.golubroman.innotechtest.Map;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.os.Handler;
 import android.widget.Toast;
 
 import com.golub.golubroman.innotechtest.R;
+import com.golub.golubroman.innotechtest.Start.StartActivity_;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -24,6 +27,8 @@ import org.androidannotations.annotations.FragmentById;
 public class MapActivity extends Activity {
 
     private double longitude, latitude;
+    private Handler handler;
+    private boolean doubleClick;
 
     @Extra
     void setLong(double longitude){
@@ -42,6 +47,7 @@ public class MapActivity extends Activity {
 //    method calling after views are ready
     @AfterViews
     protected void afterViews(){
+        handler = new Handler();
 //        trying to get map for working with it
         try{
             mapFragment.getMapAsync(new OnMapReadyCallback() {
@@ -52,11 +58,27 @@ public class MapActivity extends Activity {
                     googleMap.addMarker(new MarkerOptions().
                             position(new LatLng(latitude, longitude))
                             .title("Your location"));
-//                    displaying the message when map is ready
-                    Toast.makeText(MapActivity.this, "Map is ready", Toast.LENGTH_SHORT).show();
                 }
             });
         }catch (NullPointerException e){}
     }
 
+    @Override
+    public void onBackPressed() {
+        if(doubleClick) {
+            StartActivity_.intent(this).flags(Intent.FLAG_ACTIVITY_NEW_TASK).
+                    category(Intent.CATEGORY_HOME).start();
+        }else{
+            doubleClick = true;
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleClick = false;
+                }
+            }, 400);
+            Toast.makeText(this, "Do double click to log out", Toast.LENGTH_SHORT).show();
+
+        }
+
+    }
 }

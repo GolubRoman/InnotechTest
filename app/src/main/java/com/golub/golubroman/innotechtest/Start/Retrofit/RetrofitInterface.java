@@ -7,6 +7,6 @@ import retrofit2.http.POST;
 public interface RetrofitInterface {
 
 //    method for post request to server
-    @POST("testdata/")
-    Call<Integer> getCode();
+    @POST("testdata/data.php")
+    Call<String> getCode();
 }

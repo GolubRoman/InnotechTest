@@ -34,6 +34,8 @@ import com.golub.golubroman.innotechtest.Map.Location.LocationFragment;
 import com.golub.golubroman.innotechtest.Map.MapActivity_;
 import com.golub.golubroman.innotechtest.R;
 import com.golub.golubroman.innotechtest.Start.Retrofit.RetrofitModule;
+
+import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
@@ -60,6 +62,12 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
     private final int NOTIFICATION_CODE = 1001;
     private Fragment locationFragment;
     private String code = "0000";
+    private boolean end;
+
+    @Extra
+    protected void setEnd(boolean end){
+        this.end = end;
+    }
 
 //    retreiving colors from resources
     @ColorRes(R.color.colorGreen)
@@ -177,16 +185,16 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
 //    click listener to button for getting code
     @Click(R.id.get_code)
     protected void onGetCode(){
+        progressLayout.setVisibility(View.VISIBLE);
 //        putting request to server on background thread
         onProcessCode();
     }
-
 
 //    method for requesting server on background thread
     @Background
     protected void onProcessCode(){
         try {
-            Response<String> response = RetrofitModule.buildApi().getCode().execute();
+            Response<String> response = RetrofitModule.buildApi().getCode("something").execute();
             onDisplayCode(response.body());
         } catch (IOException e) {
             e.printStackTrace();
@@ -202,22 +210,35 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
     protected void onDisplayCode(String code){
         this.code = code;
         if(code == null) {
-            this.code = "0000";
-            Toast.makeText(this, "Getting result failed", Toast.LENGTH_SHORT).show();
-        }
-//        here is notification builder which build notification with code from server
-        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ic_lock)
-                .setSound(alarmSound)
-                .setPriority(Notification.PRIORITY_HIGH)
-                .setTicker("Input this code: " + code)
-                .setContentTitle("Security code")
-                .setContentText("Input this code: " + this.code);
-        NotificationManager notificationManager = (NotificationManager)
-                getSystemService(NOTIFICATION_SERVICE);
+            progressLayout.setVisibility(View.INVISIBLE);
+            Toast.makeText(this, "Не удалось получить результат", Toast.LENGTH_SHORT).show();
+        }else{
+            progressLayout.setVisibility(View.INVISIBLE);
+            //        here is notification builder which build notification with code from server
+            this.code = formatCode(code);
+            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                    .setSmallIcon(R.drawable.ic_lock)
+                    .setSound(alarmSound)
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setTicker("Введите этот код: " + this.code)
+                    .setContentTitle("Код безопасности")
+                    .setContentText("Введите этот код: " + this.code);
+            NotificationManager notificationManager = (NotificationManager)
+                    getSystemService(NOTIFICATION_SERVICE);
 //        user should see notification
-        notificationManager.notify(NOTIFICATION_CODE, mBuilder.build());
+            notificationManager.notify(NOTIFICATION_CODE, mBuilder.build());
+        }
+
+    }
+
+    private String formatCode(String unformattedCode){
+        String code = new String();
+        for(int i = 0; i < unformattedCode.length(); i++){
+            if(Character.isDigit(unformattedCode.charAt(i)))
+            code += unformattedCode.charAt(i);
+        }
+        return code.substring(code.length() - 4, code.length());
     }
 
 //    method after views are ready
@@ -232,10 +253,23 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
         submitCode.setEnabled(false);
         phoneCodeText.setTextColor(colorPrimary);
         inputPhone.setTextColor(colorPrimary);
+        progressLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
         locationFragment = LocationFragment.newInstance();
     }
 
-//    interface method for getting results from dialog
+    @Override
+    public void onBackPressed() {
+        if(end){
+            finish();
+        }
+    }
+
+    //    interface method for getting results from dialog
     @Override
     public void onPhoneCodeSelected(int position, String phoneCode) {
         currentPhoneCodePosition = position;
@@ -255,20 +289,14 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
                                 replace(android.R.id.content, locationFragment, "LocationFragment").
                                 commit();
                         progressLayout.setVisibility(View.VISIBLE);
-                        progressLayout.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                            }
-                        });
                     } else {
-                        Toast.makeText(this, "Authentication failed, the code is incorrect",
+                        Toast.makeText(this, "Не удалось провести аутентификацию, код неверный",
                                 Toast.LENGTH_SHORT).show();
                     }
                 }
 
             }else{
-                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Разрешение для местоположения отклонено", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -284,7 +312,9 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
     @Override
     public void setLocation(double latitude, double longitude) {
         progressLayout.setVisibility(View.GONE);
-        MapActivity_.intent(this).setLong(longitude).setLat(latitude).start();
+        MapActivity_.intent(this).
+                flags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK).
+                setLong(longitude).setLat(latitude).start();
     }
 
 //    checking if location is enabled
@@ -307,18 +337,18 @@ public class StartActivity extends Activity implements RequestPhoneCodeFragment.
     }
 
 //    showing alert because of
-private void showAlert(){
-    AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-    alertDialog.setTitle("Location").
-            setMessage("Please, enable getting location for further work with app").
-            setCancelable(true).
-            setPositiveButton("OKEY", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
-                    getIntent().putExtra("back", "yes");
-                }
-            }).create().show();
-}
+    private void showAlert(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setTitle("Локация").
+                setMessage("Пожалуйста, включите получение местоположения для дальнейшей работы приложения").
+                setCancelable(true).
+                setPositiveButton("ОК", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(intent);
+                        getIntent().putExtra("back", "yes");
+                    }
+                }).create().show();
+    }
 }

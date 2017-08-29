@@ -57,7 +57,7 @@ public class MapActivity extends Activity {
 //                    adding marker to map with title
                     googleMap.addMarker(new MarkerOptions().
                             position(new LatLng(latitude, longitude))
-                            .title("Your location"));
+                            .title("Ваше местоположение"));
                 }
             });
         }catch (NullPointerException e){}
@@ -66,8 +66,10 @@ public class MapActivity extends Activity {
     @Override
     public void onBackPressed() {
         if(doubleClick) {
-            StartActivity_.intent(this).flags(Intent.FLAG_ACTIVITY_NEW_TASK).
-                    category(Intent.CATEGORY_HOME).start();
+            StartActivity_.intent(this).
+                    flags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK).
+                    category(Intent.CATEGORY_HOME).setEnd(true).start();
+            finish();
         }else{
             doubleClick = true;
             handler.postDelayed(new Runnable() {
@@ -76,7 +78,7 @@ public class MapActivity extends Activity {
                     doubleClick = false;
                 }
             }, 400);
-            Toast.makeText(this, "Do double click to log out", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Двойной клик для выхода", Toast.LENGTH_SHORT).show();
 
         }
 

@@ -1,5 +1,8 @@
 package com.golub.golubroman.innotechtest.Start.Retrofit;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -13,10 +16,15 @@ public class RetrofitModule {
 
 //    building retrofit module and returning retrofitInterface
     public static RetrofitInterface buildApi(){
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
 //        building retrofit object
         retrofit = new Retrofit.Builder().
                 baseUrl("http://s3.logist.ua/").
-                addConverterFactory(GsonConverterFactory.create()).
+                addConverterFactory(new StringConverter()).
                 build();
 
 //        building retrofit interface and returning that one
